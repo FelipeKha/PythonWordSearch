@@ -11,11 +11,11 @@ Out too the been like hard off. Improve enquire welcome own beloved matters her.
 """
 
 if len(args) == 0:
-  raise Exception("Please provide total of documents")
+  raise Exception("Please provide total of documents_10")
 
 total_docs = int(args[0])
 
-print(f"you asked to create {total_docs} documents")
+print(f"you asked to create {total_docs} documents_10")
 
 i = 0
 target_directory_path = Path(f"./documents_{total_docs}")

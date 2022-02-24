@@ -1,6 +1,9 @@
 import unittest, os, json
 
-from demo.backend import Index, Search, FileDatabase
+from index_management import Index
+from search import Search
+from file_database import FileDatabase
+
 
 class TestIndexationRequired(unittest.TestCase):
     def test_indexation_required_returns_true_when_new_folder_selected(self):
@@ -16,7 +19,7 @@ class TestIndexationRequired(unittest.TestCase):
 
     def test_indexation_required_returns_true_when_txt_file_has_changed(self):
         # Given
-        search_folder_path = './documents'
+        search_folder_path = './documents_10'
         index = Index(search_folder_path)
         index.index_creation()
         temp_text_file_content = "test"
@@ -33,7 +36,7 @@ class TestIndexationRequired(unittest.TestCase):
 
     def test_indexation_required_returns_false_when_txt_files_havent_changed(self):
         # Given
-        search_folder_path = './documents'
+        search_folder_path = './documents_10'
         index = Index(search_folder_path)
         index.index_creation()
 
@@ -46,7 +49,7 @@ class TestIndexationRequired(unittest.TestCase):
 class TestIndexCreation(unittest.TestCase):
 
     def setUp(self):
-        self.search_folder_path = './documents'
+        self.search_folder_path = './documents_10'
         self.index = Index(self.search_folder_path)
 
         self.index_file_path_upper = f"./demo/{os.path.basename(self.index._index_file_path)}"

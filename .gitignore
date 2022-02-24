@@ -1,9 +1,8 @@
 # Project-wide
 .DS_Store
-old
-documents_1000
-documents_10000
-documents_100000
+text_documents/documents_1000
+text_documents/documents_10000
+text_documents/documents_100000
 *.json
 
 

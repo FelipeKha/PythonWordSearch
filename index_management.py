@@ -1,5 +1,5 @@
 import glob, os
-from time import process_time
+import time
 
 
 class IndexManagement:
@@ -35,12 +35,12 @@ class IndexManagement:
         self._json_lower_creation()
 
     def _json_lower_creation(self):
-        t0 = process_time()
+        t0 = time.time()
         json_dict_upper = self.file_database_upper.read_dictionary()
         index_dict_upper = json_dict_upper['index']
         index_dict_lower = self._conversion_index_to_lower(index_dict_upper)
         index_dict_lower = self._index_dict_conversion_from_set_to_list(index_dict_lower)
-        t1 = process_time()
+        t1 = time.time()
         indexation_time = t1-t0
         json_dict_lower = self._json_dict_set_up(self.file_database_lower.index_file_path,
                                                  index_dict_lower, indexation_time)

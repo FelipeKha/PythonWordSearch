@@ -10,8 +10,8 @@ class Indexation:
 
     def indexation(self):
         for file_path in self.file_paths:
-            pid = os.getpid()
-            print(f"Process id for {os.path.basename(file_path)}: {pid}")
+            # pid = os.getpid()
+            # print(f"Process id for {os.path.basename(file_path)}: {pid}")
             words_list = self._words_list_from_txt_file(file_path)
             self._index_dict_construction(words_list, file_path)
         return self.index_dict

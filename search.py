@@ -1,27 +1,26 @@
-import json
+from file_database import FileDatabase
 
 
 class Search:
 
-    def __init__(self, word_searched, index_file_path, index_no_cap_file_path):
+    def __init__(self, word_searched, file_database_upper, file_database_lower):
         self.word_searched = word_searched
-        self.index_file_path = index_file_path
-        self.index_no_cap_file_path = index_no_cap_file_path
+        self.file_database_upper = file_database_upper
+        self.file_database_lower = file_database_lower
 
-    def search_cap(self):
-        index = self._load_index(self.index_file_path)
-        return self._search(self.word_searched, index)
+    def search_upper(self):
+        index = self.file_database_upper.read_dictionary()
+        result = self._search(self.word_searched, index)
+        return result
 
-    def search_no_cap(self):
+    def search_lower(self):
         self.word_searched = self.word_searched.lower()
-        index = self._load_index(self.index_no_cap_file_path)
-        return self._search(self.word_searched, index)
+        index = self.file_database_lower.read_dictionary()
+        result = self._search(self.word_searched, index)
+        return result
 
-    # This is a static method, would be better to be taken out of the classes to uses across
-    def _load_index(self, index_file_path):
-      return json.load(open(index_file_path))
-
-    def _search(self, word_searched, index):
+    @staticmethod
+    def _search(word_searched, index):
         if word_searched in index['index']:
             return index['index'][word_searched]
         else:

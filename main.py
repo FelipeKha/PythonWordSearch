@@ -4,7 +4,7 @@ import os
 from index_management import IndexManagement
 from search import Search
 from file_database import FileDatabase
-from indexation_multiprocessing_with_lists import Indexation
+from indexation_multi_process_queue_full_txt import Indexation
 import click
 import time
 
@@ -91,9 +91,7 @@ if __name__ == '__main__':
 
 """
 Function or class required after a decorator, why?
-List comprehension on row 82 of index_management.py does not work, need to figure out why (this leads to repeating results)
-Indexation is too slow, how can we speed it up?
-
 How can I improve presentation to remain within the 80 character per row rule?
+Can we walk through the order of execution of indexation_multi_process_queue.py?
 """
 

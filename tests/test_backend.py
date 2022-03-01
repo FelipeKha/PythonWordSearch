@@ -2,11 +2,29 @@ import unittest, os, json
 
 from demo.backend import Index, Search, FileDatabase
 
+
+class InMemorySimpleDatabase:
+    def __init__(self):
+        self._dict = None
+
+    def save_dictionary(self, dict):
+        self._dict = dict
+
+    def read_dictionary(self):
+        return self._dict
+
+
 class TestIndexationRequired(unittest.TestCase):
+
+    def setUp(self):
+        self.test_db = InMemorySimpleDatabase()
+        self.test_db_no_cap = InMemorySimpleDatabase()
+
     def test_indexation_required_returns_true_when_new_folder_selected(self):
         # Given
         search_folder_path = '/non_existing_folder'
-        index = Index(search_folder_path)
+
+        index = Index(search_folder_path, database=self.test_db, database_no_cap=self.test_db_no_cap)
 
         # When
         is_required = index.indexation_required()
@@ -91,23 +109,23 @@ class TestIndexCreation(unittest.TestCase):
 
 class TestSearch(unittest.TestCase):
     def setUp(self):
-        self.upper_index_file_path = './upper_index_for_search_test.json'
-        self.lower_index_file_path = './lower_index_for_search_test.json'
 
         index_dict_upper = {'index': {}}
         index_dict_lower = {'index': {}}
         self.temp_text_file_content = "WeirdContentForTestOnly"
         self.fictitious_txt_file_name = "fictitious_file.txt"
+
+        database = InMemorySimpleDatabase()
         index_dict_upper['index'][self.temp_text_file_content] = self.fictitious_txt_file_name
+        database.save_dictionary(index_dict_upper)
+
+        database_no_cap = InMemorySimpleDatabase()
         index_dict_lower['index'][self.temp_text_file_content.lower()] = self.fictitious_txt_file_name
+        database_no_cap.save_dictionary(index_dict_lower)
 
-        self.upper_file_database = FileDatabase(self.upper_index_file_path)
-        self.lower_file_database = FileDatabase(self.lower_index_file_path)
-        self.upper_file_database.save_dictionary(index_dict_upper)
-        self.lower_file_database.save_dictionary(index_dict_lower)
-
-        self.search = Search(self.temp_text_file_content, self.upper_index_file_path,
-                             self.lower_index_file_path)
+        self.search = Search(self.temp_text_file_content,
+                             database=database,
+                             database_no_cap=database_no_cap)
 
     def test_search_cap_returns_expected_result(self):
         self.assertEqual(self.search.search_cap(), self.fictitious_txt_file_name)
@@ -116,8 +134,7 @@ class TestSearch(unittest.TestCase):
         self.assertEqual(self.search.search_no_cap(), self.fictitious_txt_file_name)
 
     def tearDown(self):
-        os.remove(self.upper_index_file_path)
-        os.remove(self.lower_index_file_path)
+        pass
 
 if __name__ == '__main__':
     unittest.main()

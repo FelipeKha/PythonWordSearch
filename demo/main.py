@@ -1,6 +1,6 @@
 #!../virtual/bin/python3
 
-from backend import Index, Search
+from backend import Index, Search, FileDatabase, BetterDatabase
 import click
 
 @click.command()
@@ -9,9 +9,15 @@ import click
 @click.option('--capitalization_matter', prompt='Does capitalization matter?', help='Specify if the capitalization of the word entered for search matter', is_flag=True)
 
 
-
 def search(search_folder, search_word, capitalization_matter):
-    index = Index(search_folder)
+    _index_file_path = f"./index_{os.path.basename(self.target_directory_path)}.json"
+    _index_no_cap_file_path = f"./index_no_cap_{os.path.basename(self.target_directory_path)}.json"
+
+    file_database_cap = FileDatabase(_index_file_path)
+    file_database_no_cap = FileDatabase(_index_no_cap_file_path)
+
+    index = Index(search_folder, database=file_database_cap, database_no_cap=file_database_no_cap)
+
     search = Search(search_word, index._index_file_path, index._index_no_cap_file_path)
 
     indexation_required = index.indexation_required()

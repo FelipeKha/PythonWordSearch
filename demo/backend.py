@@ -4,29 +4,47 @@ from time import process_time
 import multiprocessing
 from functools import partial
 
+
 class FileDatabase:
-    def __init__(self, db_folder_path):
-        self._db_folder_path = db_folder_path
+    def __init__(self, db_file_path):
+        self._file_path = db_file_path
+        self._last_modified = None
 
     def save_dictionary(self, dict):
         index_json = json.dumps(dict)
-        index_file = open(self._db_folder_path, "w")
+        index_file = open(self._file_path, "w")
         index_file.write(index_json)
         index_file.close()
 
     def read_dictionary(self):
-        index = json.load(open(self._db_folder_path))
-        return index
+        try:
+            index = json.load(open(self._file_path))
+            return index
+        except FileNotFoundError:
+            raise DictionaryNotSavedException()
+
+    def last_modified(self):
+        return self._last_modified
+
+
+class DictionaryNotSavedException(Exception):
+    pass
+    
+    
+class BetterDatabase:
+    def save_dictionary(self, dict):
+        pass
+
+    def read_dictionary(self):
+        pass
+
 
 class Index:
-
-    def __init__(self, search_folder_path):
+    def __init__(self, search_folder_path, database, database_no_cap):
         self.target_directory_path = search_folder_path
-        self._index_file_path = f"./index_{os.path.basename(self.target_directory_path)}.json"
-        self._index_no_cap_file_path = f"./index_no_cap_{os.path.basename(self.target_directory_path)}.json"
         self.file_paths = []
-        self.file_database = FileDatabase(self._index_file_path)
-        self.file_database_no_cap = FileDatabase(self._index_no_cap_file_path)
+        self.database = database
+        self.database_no_cap = database_no_cap
 
     def indexation_required(self):
         new_file_count = 0
@@ -50,21 +68,21 @@ class Index:
         t1 = process_time()
         elapsed_time = t1 - t0
         index_dict['meta_data']['indexation_time'] = elapsed_time
-        self.file_database.save_dictionary(index_dict)
+        self.database.save_dictionary(index_dict)
         self._index_no_cap()
         print("Indexation ended")
         print(f"Indexation time of {self._get_indexation_time(self._index_file_path) + self._get_indexation_time(self._index_no_cap_file_path)} seconds ({self._get_indexation_time(self._index_file_path)} for initial index, {self._get_indexation_time(self._index_no_cap_file_path)} for no_cap index)")
 
     def _index_no_cap(self):
         t0 = process_time()
-        index_cap = self.file_database.read_dictionary()
+        index_cap = self.database.read_dictionary()
         index_no_cap = self._index_dict_set_up(self._index_no_cap_file_path)
         index_no_cap = self._conversion_index_to_no_cap(index_cap, index_no_cap)
         index_no_cap = self._index_dict_conversion_from_set_to_list(index_no_cap)
         t1 = process_time()
         elapsed_time = t1 - t0
         index_no_cap['meta_data']['indexation_time'] = elapsed_time
-        self.file_database_no_cap.save_dictionary(index_no_cap)
+        self.database_no_cap.save_dictionary(index_no_cap)
 
     # Static method
     def _index_dict_set_up(self, index_file_path):
@@ -141,27 +159,28 @@ class Indexation:
                 index_dict['index'][word] = {file_path}
         return index_dict
 
-class Search:
 
-    def __init__(self, word_searched, index_file_path, index_no_cap_file_path):
+class Search:
+    def __init__(self, word_searched, database, database_no_cap):
         self.word_searched = word_searched
-        self.index_file_path = index_file_path
-        self.index_no_cap_file_path = index_no_cap_file_path
+        self._database = database
+        self._database_no_cap = database_no_cap
 
     def search_cap(self):
-        index = self._load_index(self.index_file_path)
+        index = self._database.read_dictionary()
         return self._search(self.word_searched, index)
 
     def search_no_cap(self):
         self.word_searched = self.word_searched.lower()
-        index = self._load_index(self.index_no_cap_file_path)
+        index = self._database_no_cap.read_dictionary()
         return self._search(self.word_searched, index)
 
-    # This is a static method, would be better to be taken out of the classes to uses across
-    def _load_index(self, index_file_path):
-      return json.load(open(index_file_path))
+    # # This is a static method, would be better to be taken out of the classes to uses across
+    # def _load_index(self, index_file_path):
+    #   return json.load(open(index_file_path))
 
-    def _search(self, word_searched, index):
+    @staticmethod
+    def _search(word_searched, index):
         if word_searched in index['index']:
             return index['index'][word_searched]
         else:

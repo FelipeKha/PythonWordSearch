@@ -1,6 +1,8 @@
 import glob, os
 import time
 
+from exceptions import NoTextFilesError, NoTargetDirectoryError
+
 
 class IndexManagement:
 
@@ -14,9 +16,16 @@ class IndexManagement:
         self.index_dict = {}
 
     def indexation_required(self):
+        if not os.path.isdir(self.search_folder_path):
+            raise NoTargetDirectoryError
+
         new_file_count = 0
         self.text_file_paths_list = \
             glob.glob(f"{self.search_folder_path}/*txt")
+
+        if len(self.text_file_paths_list) == 0:
+                raise NoTextFilesError
+
         if os.path.isfile(self.file_database_upper.index_file_path) and \
            os.path.isfile(self.file_database_lower.index_file_path):
             for file_path in self.text_file_paths_list:
